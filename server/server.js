@@ -43,8 +43,19 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/dev', devRoutes);
 
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/dist')));
-  app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../client/dist/index.html')));
+  const staticPath = path.join(__dirname, '../client/dist');
+  app.use(express.static(staticPath, {
+    setHeaders(res, filePath) {
+      if (filePath.endsWith('index.html')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+    }
+  }));
+
+  app.get('*', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    return res.sendFile(path.join(staticPath, 'index.html'));
+  });
 }
 
 const PORT = process.env.PORT || 5000;
