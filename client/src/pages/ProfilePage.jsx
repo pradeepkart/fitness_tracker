@@ -1,14 +1,32 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { user: authUser } = useAuth();
 
   useEffect(() => {
     let mounted = true;
-    api.get('/users/profile').then((res) => { if (mounted) setProfile(res.data.user); }).catch(() => {}).finally(() => { if (mounted) setLoading(false); });
+    const load = async () => {
+      try {
+        const res = await api.get('/users/profile');
+        if (mounted) setProfile(res.data.user);
+      } catch (err) {
+        try {
+          const alt = await api.get('/auth/me');
+          if (mounted) setProfile(alt.data.user);
+        } catch (e) {
+          if (mounted && authUser) setProfile(authUser);
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    load();
     return () => { mounted = false; };
   }, []);
 
