@@ -15,7 +15,8 @@ export default function RegisterPage() {
       await register(form);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      console.error('Register error', err);
+      setError(err.response?.data?.message || err.message || 'Registration failed');
     }
   };
 
@@ -35,7 +36,7 @@ export default function RegisterPage() {
             <option value="Other">Other</option>
           </select>
           {error && <p className="text-sm text-rose-400">{error}</p>}
-          <button className="w-full rounded-xl bg-cyan-500 px-4 py-3 font-semibold text-slate-950">Create account</button>
+          <button disabled={false} className="w-full rounded-xl bg-cyan-500 px-4 py-3 font-semibold text-slate-950 disabled:opacity-60" type="submit">Create account</button>
         </form>
         <p className="mt-4 text-sm text-slate-400">Already have an account? <Link className="text-cyan-400" to="/login">Login</Link></p>
       </motion.div>
