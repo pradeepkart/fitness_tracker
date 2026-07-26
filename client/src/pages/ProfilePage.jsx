@@ -6,11 +6,16 @@ import { useAuth } from '../context/AuthContext';
 export default function ProfilePage() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { user: authUser } = useAuth();
+  const { user: authUser, isLocalAccount, updateLocalProfile } = useAuth();
 
   useEffect(() => {
     let mounted = true;
     const load = async () => {
+      if (isLocalAccount) {
+        if (mounted) setProfile(authUser);
+        if (mounted) setLoading(false);
+        return;
+      }
       try {
         const res = await api.get('/users/profile');
         if (mounted) setProfile(res.data.user);
@@ -28,9 +33,15 @@ export default function ProfilePage() {
 
     load();
     return () => { mounted = false; };
-  }, []);
+  }, [authUser, isLocalAccount]);
 
   const save = (updates) => {
+    if (isLocalAccount) {
+      const updatedUser = updateLocalProfile(updates);
+      setProfile(updatedUser);
+      window.dispatchEvent(new Event('profileUpdated'));
+      return;
+    }
     api.put('/users/profile', updates).then((res) => { setProfile(res.data.user); try { window.dispatchEvent(new Event('profileUpdated')); } catch (e) {} }).catch(() => { import('react-hot-toast').then(({ default: toast }) => toast.error('Failed to save profile')).catch(() => alert('Failed to save profile')); });
   };
 
@@ -55,7 +66,7 @@ export default function ProfilePage() {
               </div>
               <div className="rounded-2xl border border-slate-800 bg-slate-800/50 p-4">
                 <p className="text-sm text-slate-400">Email</p>
-                <p className="mt-2 font-semibold">{profile?.email}</p>
+                <p className="mt-2 break-all text-sm font-semibold leading-6">{profile?.email}</p>
               </div>
               <div className="rounded-2xl border border-slate-800 bg-slate-800/50 p-4">
                 <p className="text-sm text-slate-400">Height (cm)</p>

@@ -7,16 +7,16 @@ import api from '../services/api';
 export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
-  const { login, setUser } = useAuth();
+  const { login, loginWithLocalAccount, setUser } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await login(form.email, form.password);
+      const localLoginSucceeded = await loginWithLocalAccount(form.email, form.password);
+      if (!localLoginSucceeded) await login(form.email, form.password);
       navigate('/');
     } catch (err) {
-      console.error('Login error', err);
       setError(err.response?.data?.message || err.message || 'Login failed');
     }
   };
@@ -40,8 +40,8 @@ export default function LoginPage() {
         <h2 className="text-3xl font-semibold">Welcome back</h2>
         <p className="mt-2 text-slate-400">Sign in to continue your fitness journey.</p>
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <input className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3" placeholder="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-          <input className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3" placeholder="Password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+          <input required autoComplete="email" className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3" placeholder="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <input required autoComplete="current-password" className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3" placeholder="Password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
           {error && <p className="text-sm text-rose-400">{error}</p>}
           <button className="w-full rounded-xl bg-cyan-500 px-4 py-3 font-semibold text-slate-950">Login</button>
         </form>

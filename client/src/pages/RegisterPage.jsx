@@ -15,7 +15,6 @@ export default function RegisterPage() {
       await register(form);
       navigate('/');
     } catch (err) {
-      console.error('Register error', err);
       setError(err.response?.data?.message || err.message || 'Registration failed');
     }
   };
@@ -26,9 +25,9 @@ export default function RegisterPage() {
         <h2 className="text-3xl font-semibold">Create account</h2>
         <p className="mt-2 text-slate-400">Join FitAI and start tracking smarter.</p>
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <input className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3" placeholder="Full Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <input className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3" placeholder="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-          <input className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3" placeholder="Password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+          <input required autoComplete="name" className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3" placeholder="Full Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <input required autoComplete="email" className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3" placeholder="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <input required minLength="6" autoComplete="new-password" className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3" placeholder="Password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
           <input className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3" placeholder="Age" type="number" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} />
           <select className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3" value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })}>
             <option value="Male">Male</option>

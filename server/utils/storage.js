@@ -9,7 +9,28 @@ const memoryStore = {
   waterLogs: []
 };
 
-export function isDbConnected() {
+let connectionPromise;
+
+/**
+ * Reuse one Mongoose connection across serverless invocations.  A module-level
+ * promise prevents parallel requests from opening multiple connections.
+ */
+export async function isDbConnected() {
+  if (mongoose.connection.readyState === 1) return true;
+
+  const connectionString = process.env.MONGODB_URI;
+  if (!connectionString) return false;
+
+  if (!connectionPromise) {
+    connectionPromise = mongoose.connect(connectionString, {
+      serverSelectionTimeoutMS: 10000
+    }).catch((error) => {
+      connectionPromise = undefined;
+      throw error;
+    });
+  }
+
+  await connectionPromise;
   return mongoose.connection.readyState === 1;
 }
 
@@ -18,7 +39,7 @@ export function getMemoryStore() {
 }
 
 export async function createUserRecord(data) {
-  if (isDbConnected()) {
+  if (await isDbConnected()) {
     const User = (await import('../models/User.js')).default;
     return User.create(data);
   }
@@ -39,7 +60,7 @@ export async function createUserRecord(data) {
 }
 
 export async function findUserByEmail(email) {
-  if (isDbConnected()) {
+  if (await isDbConnected()) {
     const User = (await import('../models/User.js')).default;
     return User.findOne({ email });
   }
@@ -48,7 +69,7 @@ export async function findUserByEmail(email) {
 }
 
 export async function findUserById(id) {
-  if (isDbConnected()) {
+  if (await isDbConnected()) {
     const User = (await import('../models/User.js')).default;
     return User.findById(id).select('-password');
   }
@@ -60,7 +81,7 @@ export async function findUserById(id) {
 }
 
 export async function findUserByIdWithPassword(id) {
-  if (isDbConnected()) {
+  if (await isDbConnected()) {
     const User = (await import('../models/User.js')).default;
     return User.findById(id);
   }
@@ -69,7 +90,7 @@ export async function findUserByIdWithPassword(id) {
 }
 
 export async function updateUserRecord(id, updates) {
-  if (isDbConnected()) {
+  if (await isDbConnected()) {
     const User = (await import('../models/User.js')).default;
     return User.findByIdAndUpdate(id, updates, { new: true }).select('-password');
   }
@@ -82,7 +103,7 @@ export async function updateUserRecord(id, updates) {
 }
 
 export async function getWorkoutsForUser(userId) {
-  if (isDbConnected()) {
+  if (await isDbConnected()) {
     const Workout = (await import('../models/Workout.js')).default;
     return Workout.find({ user: userId }).sort({ date: -1 });
   }
@@ -91,7 +112,7 @@ export async function getWorkoutsForUser(userId) {
 }
 
 export async function createWorkoutRecord(data) {
-  if (isDbConnected()) {
+  if (await isDbConnected()) {
     const Workout = (await import('../models/Workout.js')).default;
     return Workout.create(data);
   }
@@ -102,7 +123,7 @@ export async function createWorkoutRecord(data) {
 }
 
 export async function updateWorkoutRecord(id, userId, updates) {
-  if (isDbConnected()) {
+  if (await isDbConnected()) {
     const Workout = (await import('../models/Workout.js')).default;
     return Workout.findOneAndUpdate({ _id: id, user: userId }, updates, { new: true });
   }
@@ -114,7 +135,7 @@ export async function updateWorkoutRecord(id, userId, updates) {
 }
 
 export async function deleteWorkoutRecord(id, userId) {
-  if (isDbConnected()) {
+  if (await isDbConnected()) {
     const Workout = (await import('../models/Workout.js')).default;
     return Workout.deleteOne({ _id: id, user: userId });
   }
@@ -124,7 +145,7 @@ export async function deleteWorkoutRecord(id, userId) {
 }
 
 export async function getMealsForUser(userId) {
-  if (isDbConnected()) {
+  if (await isDbConnected()) {
     const Meal = (await import('../models/Meal.js')).default;
     return Meal.find({ user: userId }).sort({ date: -1 });
   }
@@ -133,7 +154,7 @@ export async function getMealsForUser(userId) {
 }
 
 export async function createMealRecord(data) {
-  if (isDbConnected()) {
+  if (await isDbConnected()) {
     const Meal = (await import('../models/Meal.js')).default;
     return Meal.create(data);
   }
@@ -144,7 +165,7 @@ export async function createMealRecord(data) {
 }
 
 export async function deleteMealRecord(id, userId) {
-  if (isDbConnected()) {
+  if (await isDbConnected()) {
     const Meal = (await import('../models/Meal.js')).default;
     return Meal.deleteOne({ _id: id, user: userId });
   }
@@ -154,7 +175,7 @@ export async function deleteMealRecord(id, userId) {
 }
 
 export async function updateMealRecord(id, userId, updates) {
-  if (isDbConnected()) {
+  if (await isDbConnected()) {
     const Meal = (await import('../models/Meal.js')).default;
     return Meal.findOneAndUpdate({ _id: id, user: userId }, updates, { new: true });
   }
@@ -166,7 +187,7 @@ export async function updateMealRecord(id, userId, updates) {
 }
 
 export async function getGoalForUser(userId) {
-  if (isDbConnected()) {
+  if (await isDbConnected()) {
     const Goal = (await import('../models/Goal.js')).default;
     let goal = await Goal.findOne({ user: userId });
     if (!goal) goal = await Goal.create({ user: userId });
@@ -182,7 +203,7 @@ export async function getGoalForUser(userId) {
 }
 
 export async function updateGoalForUser(userId, updates) {
-  if (isDbConnected()) {
+  if (await isDbConnected()) {
     const Goal = (await import('../models/Goal.js')).default;
     return Goal.findOneAndUpdate({ user: userId }, updates, { new: true, upsert: true });
   }
@@ -197,7 +218,7 @@ export async function updateGoalForUser(userId, updates) {
 }
 
 export async function getWaterLogsForUser(userId) {
-  if (isDbConnected()) {
+  if (await isDbConnected()) {
     const WaterLog = (await import('../models/WaterLog.js')).default;
     return WaterLog.find({ user: userId }).sort({ date: -1 });
   }
@@ -206,7 +227,7 @@ export async function getWaterLogsForUser(userId) {
 }
 
 export async function createWaterLogRecord(data) {
-  if (isDbConnected()) {
+  if (await isDbConnected()) {
     const WaterLog = (await import('../models/WaterLog.js')).default;
     return WaterLog.create(data);
   }

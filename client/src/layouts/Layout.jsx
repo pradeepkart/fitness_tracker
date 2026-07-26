@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FiMenu, FiX, FiHome, FiActivity, FiCoffee, FiTarget, FiCpu, FiUser } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
@@ -19,6 +19,14 @@ export default function Layout({ children }) {
   const navigate = useNavigate();
   const { user, logout, setUser } = useAuth();
 
+  useEffect(() => {
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, []);
+
   const handleClearDemo = async () => {
     if (!confirm('Clear demo data? This will remove demo data and log you out.')) return;
     try {
@@ -36,6 +44,7 @@ export default function Layout({ children }) {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <div className="flex">
+        {open && <button aria-label="Close navigation" className="fixed inset-0 z-20 bg-slate-950/70 md:hidden" onClick={() => setOpen(false)} />}
         <aside className={`fixed inset-y-0 left-0 z-30 w-64 transform ${open ? 'translate-x-0' : '-translate-x-full'} transition md:translate-x-0 bg-slate-900/95 p-6 shadow-2xl`}>
           <div className="mb-8">
             <h2 className="text-2xl font-semibold">FitAI</h2>
@@ -45,7 +54,7 @@ export default function Layout({ children }) {
             {navItems.map(({ label, path, icon: Icon }) => {
               const active = location.pathname === path;
               return (
-                <Link key={path} to={path} className={`flex items-center gap-3 rounded-xl px-4 py-3 ${active ? 'bg-cyan-500/20 text-cyan-300' : 'hover:bg-slate-800'}`}>
+                <Link key={path} to={path} onClick={() => setOpen(false)} className={`flex items-center gap-3 rounded-xl px-4 py-3 ${active ? 'bg-cyan-500/20 text-cyan-300' : 'hover:bg-slate-800'}`}>
                   <Icon />
                   <span>{label}</span>
                 </Link>

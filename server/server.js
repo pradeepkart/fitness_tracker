@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -16,6 +15,7 @@ import waterRoutes from './routes/waterRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import devRoutes from './routes/devRoutes.js';
+import { isDbConnected } from './utils/storage.js';
 
 dotenv.config();
 
@@ -26,6 +26,18 @@ const __dirname = path.dirname(__filename);
 app.use(helmet());
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
+
+// Establish (and reuse) the MongoDB connection before an API request reaches
+// a route. This works in long-running development servers and Vercel functions.
+app.use('/api', async (req, res, next) => {
+  try {
+    await isDbConnected();
+    next();
+  } catch (error) {
+    console.error('Database connection failed:', error.message);
+    res.status(503).json({ message: 'The data service is temporarily unavailable. Please try again shortly.' });
+  }
+});
 
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use(limiter);
@@ -59,13 +71,6 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const PORT = process.env.PORT || 5000;
-
-if (process.env.NODE_ENV !== 'test' && process.env.VERCEL !== '1') {
-  mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/fitness-tracker')
-    .catch((err) => {
-      console.warn('MongoDB connection failed, continuing with fallback storage.', err.message);
-    });
-}
 
 const startServer = () => {
   const server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
