@@ -2,12 +2,11 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
-  const { login, loginWithLocalAccount, setUser } = useAuth();
+  const { login, loginWithLocalAccount, useDemoAccount } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -24,13 +23,10 @@ export default function LoginPage() {
   const handleDemo = async () => {
     setError('');
     try {
-      const res = await api.get('/dev/seed', { params: { email: 'demo@local' } });
-      const { token, user } = res.data;
-      localStorage.setItem('token', token);
-      if (user) setUser(user);
+      await useDemoAccount();
       navigate('/');
     } catch (err) {
-      setError('Demo login failed');
+      setError(err.message || 'Demo login failed');
     }
   };
 
