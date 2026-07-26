@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import api from '../services/api';
+import toast from 'react-hot-toast';
 
 const meals = [
   { id: 1, name: 'Greek Yogurt Bowl', calories: 320, protein: 24, carbs: 38, fat: 10 },
@@ -38,10 +39,11 @@ export default function NutritionPage() {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
       <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
-        <h2 className="text-2xl font-semibold">Nutrition Tracker</h2>
-        <p className="text-slate-400">Log meals and keep your macros balanced.</p>
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold">Nutrition Tracker</h2>
+          <div>
+            <h2 className="text-2xl font-semibold">Nutrition Tracker</h2>
+            <p className="text-slate-400">Log meals and keep your macros balanced.</p>
+          </div>
           <button type="button" onClick={() => setShowForm(!showForm)} className="rounded-2xl bg-cyan-500 px-4 py-3 font-semibold text-slate-950">{showForm ? 'Hide' : 'Add Meal'}</button>
         </div>
         {showForm && (
@@ -58,13 +60,12 @@ export default function NutritionPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {loading ? <p className="text-slate-400">Loading...</p> : items.map((item) => (
-          <div key={item.id} className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+          <div key={item._id || item.id} className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
             <p className="font-semibold">{item.name}</p>
             <p className="mt-2 text-sm text-slate-400">Calories {item.calories} • Protein {item.protein}g • Carbs {item.carbs}g • Fat {item.fat}g</p>
             <div className="mt-3 flex gap-2">
               <button type="button" onClick={() => { setEditingId(item._id || item.id); setForm({ name: item.name, calories: item.calories, protein: item.protein, carbs: item.carbs, fat: item.fat }); setShowForm(true); }} className="rounded-xl border border-slate-700 p-2">Edit</button>
-              <button type="button" onClick={() => { api.delete(`/meals/${item._id || item.id}`).then(() => { setItems(items.filter((it) => (it._id || it.id) !== (item._id || item.id))); alert('Meal deleted'); }).catch(() => alert('Failed to delete meal')); }} className="rounded-xl border border-slate-700 p-2">Delete</button>
-                <button type="button" onClick={() => { api.delete(`/meals/${item._id || item.id}`).then(() => { setItems(items.filter((it) => (it._id || it.id) !== (item._id || item.id))); toast.success('Meal deleted'); }).catch(() => toast.error('Failed to delete meal')); }} className="rounded-xl border border-slate-700 p-2">Delete</button>
+              <button type="button" onClick={() => { api.delete(`/meals/${item._id || item.id}`).then(() => { setItems(items.filter((it) => (it._id || it.id) !== (item._id || item.id))); toast.success('Meal deleted'); }).catch(() => toast.error('Failed to delete meal')); }} className="rounded-xl border border-slate-700 p-2">Delete</button>
             </div>
           </div>
         ))}

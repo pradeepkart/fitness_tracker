@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -42,7 +43,7 @@ export default function ProfilePage() {
       window.dispatchEvent(new Event('profileUpdated'));
       return;
     }
-    api.put('/users/profile', updates).then((res) => { setProfile(res.data.user); try { window.dispatchEvent(new Event('profileUpdated')); } catch (e) {} }).catch(() => { import('react-hot-toast').then(({ default: toast }) => toast.error('Failed to save profile')).catch(() => alert('Failed to save profile')); });
+    api.put('/users/profile', updates).then((res) => { setProfile(res.data.user); try { window.dispatchEvent(new Event('profileUpdated')); } catch (e) {} }).catch(() => toast.error('Failed to save profile'));
   };
 
   const handleUpload = (e) => {

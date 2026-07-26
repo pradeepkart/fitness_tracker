@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FiMenu, FiX, FiHome, FiActivity, FiCoffee, FiTarget, FiCpu, FiUser } from 'react-icons/fi';
+import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
@@ -35,10 +36,12 @@ export default function Layout({ children }) {
       // ignore errors; still log out
     }
     localStorage.removeItem('token');
+    localStorage.removeItem('fitai_local_session');
+    localStorage.removeItem('fitai_local_account');
+    localStorage.removeItem('fitai_local_tracker');
     if (setUser) setUser(null);
     navigate('/login');
-    // use toast for confirmation
-    try { (await import('react-hot-toast')).default.success('Demo data cleared and logged out'); } catch (e) { /* fallback */ }
+    toast.success('Demo data cleared and logged out');
   };
 
   return (
@@ -69,7 +72,7 @@ export default function Layout({ children }) {
           </div>
         </aside>
 
-        <div className="flex-1 md:ml-64">
+        <div className="min-w-0 flex-1 md:ml-64">
           <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/90 backdrop-blur">
             <div className="flex items-center justify-between px-4 py-4 md:px-8">
               <button className="rounded-xl border border-slate-800 p-2 md:hidden" onClick={() => setOpen(!open)}>

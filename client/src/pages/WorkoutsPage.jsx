@@ -65,12 +65,12 @@ export default function WorkoutsPage() {
 
       <div className="grid gap-4">
         {loading ? <p className="text-slate-400">Loading...</p> : items.map((item) => (
-          <div key={item.id} className="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-            <div>
+          <div key={item._id || item.id} className="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-900/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
               <p className="font-semibold">{item.name}</p>
               <p className="text-sm text-slate-400">{item.category} • {item.duration} min • {item.calories} kcal</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex shrink-0 gap-2">
               <button type="button" onClick={() => { setEditingId(item._id || item.id); setForm({ name: item.name, category: item.category, duration: item.duration, calories: item.calories }); setShowForm(true); }} className="rounded-xl border border-slate-700 p-2"><FiEdit /></button>
               <button type="button" onClick={() => { api.delete(`/workouts/${item._id || item.id}`).then(() => { setItems(items.filter((it) => (it._id || it.id) !== (item._id || item.id))); toast.success('Workout deleted'); }).catch(() => toast.error('Failed to delete workout')); }} className="rounded-xl border border-slate-700 p-2"><FiTrash2 /></button>
             </div>

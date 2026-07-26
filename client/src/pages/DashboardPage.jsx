@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { Line, Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { FiDroplet, FiClock, FiTarget, FiTrendingUp, FiZap, FiActivity } from 'react-icons/fi';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
 
 // chart data is built below from API responses
 
@@ -97,10 +97,10 @@ export default function DashboardPage() {
     }).catch(() => {});
   };
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="min-w-0 space-y-6">
       <div className="rounded-3xl border border-slate-800 bg-gradient-to-br from-cyan-500/20 to-slate-900 p-6">
         <p className="text-sm text-cyan-300">Welcome back</p>
-        <h2 className="mt-2 text-3xl font-semibold">Your fitness plan is on track</h2>
+        <h2 className="mt-2 text-2xl font-semibold sm:text-3xl">Your fitness plan is on track</h2>
         <p className="mt-3 max-w-2xl text-slate-300">Review your daily progress, uncover trends, and stay motivated with AI-generated insights.</p>
       </div>
 
